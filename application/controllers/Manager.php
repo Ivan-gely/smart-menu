@@ -99,20 +99,28 @@ class Manager extends CI_Controller
     public function customization()
     {
         if ($this->controle() == true) {
-
-            $user_id = $_SESSION["user_id"];  
+            $user_id = $_SESSION["user_id"];
             $image = $this->Image_model->selectbyuserid($user_id);
-            $data['image'] = $image;
-
+            if ($image == '') {
+                $data['image'] = array(
+                    'id' => 1,
+                    'user_id' => 1,
+                    'name' => 'exemple',
+                    'type' => '.jpg',
+                );
+            } else {
+                $data['image'] = $image;
+            }
             $this->load->library('upload');
             $data = array(
                 'user_id' => $_SESSION["user_id"],
                 'image' => $image,
                 'customization' => $this->Establishment_model->selectbyuserid($user_id),
-                'error' => $this->upload->display_errors('<div class="alert alert-danger mt-2 h-50">', '</div>')
+                'error' => $this->upload->display_errors('<div class="alert alert-danger mt-2 h-50">', '</div>'),
             );
 
             $this->template->load('back/template', 'back/customization', $data);
+
         } else {
             redirect(base_url() . 'manager/create_establishment');
         }
@@ -167,7 +175,7 @@ class Manager extends CI_Controller
             $this->Image_model->update($params, $_SESSION['user_id']);
             $this->template->load('back/template', 'back/customization', $data);
             redirect(base_url() . 'manager/customization', $data);
-        }else {
+        } else {
             $this->customization();
         }
     }
@@ -179,7 +187,7 @@ class Manager extends CI_Controller
             'presentation' => $this->input->post('presentation'),
         ];
         $this->Establishment_model->update($data, $user_id);
-        
+
         redirect(base_url() . 'manager/customization');
     }
 
@@ -187,10 +195,10 @@ class Manager extends CI_Controller
     {
         $user_id = $_SESSION["user_id"];
         $data = [
-            'background' => $this->input->post('imagebackground')
+            'background' => $this->input->post('imagebackground'),
         ];
         $this->Establishment_model->update($data, $user_id);
-        
+
         redirect(base_url() . 'manager/customization');
     }
 
@@ -199,14 +207,18 @@ class Manager extends CI_Controller
     public function category()
     {
         if ($this->controle() == true) {
-            $esta_id = $_SESSION['establishment_id'];
-            $cat = $this->Category_model->selectestbyid($esta_id);
-            $data["cat"] = $cat;
-            $this->template->load('back/template', 'back/category', $data);
+            $cat = $this->Category_model->selectestbyid($_SESSION['establishment_id']);
+
+            if ($cat != '') {
+                redirect(base_url() . 'manager/add_category');
+            } else {
+                $esta_id = $_SESSION['establishment_id'];
+                $cat = $this->Category_model->selectestbyid($esta_id);
+                $data["cat"] = $cat;
+                $this->template->load('back/template', 'back/category', $data);}
         } else {
             redirect(base_url() . 'manager/create_establishment');
         }
-
     }
 
     public function modify_cat($cat_id)
@@ -269,23 +281,28 @@ class Manager extends CI_Controller
     public function product()
     {
         if ($this->controle() == true) {
-            $esta_id = $_SESSION['establishment_id'];
-            $cat = $this->Product_model->selectcatbyestid($esta_id);
-            foreach ($cat as $v) {
-                $cat_ids[] = $v->id;
-            }
-            $products = $this->Product_model->selectproductbycatid($cat_ids);
+            $cat = $this->Category_model->selectestbyid($_SESSION['establishment_id']);
 
-            $prod_cat = [];
-            foreach ($products as $product) {
-                if (!isset($prod_cat[$product->name_cat])) {
-                    $prod_cat[$product->name_cat] = [];
+            if ($cat != '') {
+                redirect(base_url() . 'manager/add_category');
+            } else {
+                $cat = $this->Product_model->selectcatbyestid($_SESSION['establishment_id']);
+                foreach ($cat as $v) {
+                    $cat_ids[] = $v->id;
                 }
-                $prod_cat[$product->name_cat][] = $product;
-            }
-            $data["prod_cat"] = $prod_cat;
+                $products = $this->Product_model->selectproductbycatid($cat_ids);
 
-            $this->template->load('back/template', 'back/product', $data);
+                $prod_cat = [];
+                foreach ($products as $product) {
+                    if (!isset($prod_cat[$product->name_cat])) {
+                        $prod_cat[$product->name_cat] = [];
+                    }
+                    $prod_cat[$product->name_cat][] = $product;
+                }
+                $data["prod_cat"] = $prod_cat;
+
+                $this->template->load('back/template', 'back/product', $data);
+            }
         } else {
             redirect(base_url() . 'manager/create_establishment');
         }
@@ -294,10 +311,17 @@ class Manager extends CI_Controller
     public function add_product()
     {
         if ($this->controle() == true) {
-            $estid = $_SESSION['establishment_id'];
-            $cat = $this->Category_model->selectestbyid($estid);
-            $data["cat"] = $cat;
-            $this->template->load('back/template', 'back/add_product', $data);
+            $cat = $this->Category_model->selectestbyid($_SESSION['establishment_id']);
+
+            if ($cat != '') {
+                redirect(base_url() . 'manager/add_category');
+            } else {
+
+                $estid = $_SESSION['establishment_id'];
+                $cat = $this->Category_model->selectestbyid($estid);
+                $data["cat"] = $cat;
+                $this->template->load('back/template', 'back/add_product', $data);
+            }
         } else {
             redirect(base_url() . 'manager/create_establishment');
         }

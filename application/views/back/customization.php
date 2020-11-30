@@ -15,7 +15,7 @@
         <hr><br>
         <h4>Logo de votre établissement</h4><br>
 
-        <div><img class="img-fluid" src="<?=base_url() . 'uploads/logo/' . $user_id . $image->name . $image->type?>?t=<?=time()?>"
+        <div><img class="img-fluid" src="<?=base_url() . 'uploads/logo/' . $user_id . $image['name'] . $image['type']?>?t=<?=time()?>"
                 alt="logo">
         </div><br>
 

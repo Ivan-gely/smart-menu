@@ -12,4 +12,8 @@ class User_model extends CI_Model
         return $query->row();
     }
     
+    public function changeactif($params){
+        $this->db->where('id', $params);
+        $this->db->update('user', array('actif' => 1));
+    }
 }

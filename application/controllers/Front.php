@@ -49,31 +49,38 @@ class Front extends CI_Controller
             $email = $this->input->post('email');
             $password = $this->input->post('password');
             $password = password_hash($password, PASSWORD_DEFAULT);
-
+            
             $data['pseudo'] = $pseudo;
             $data['email'] = $email;
             $data['password'] = $password;
-
             $this->User_model->insert($data);
 
+            $user = $this->User_model->selectuserbyemail($email);
             $this->load->library('email');
             $this->email->from('machinbiduletruc31@gmail.com', 'admin');
             $this->email->to($email);
             $this->email->subject('Inscription pour Smart_menu');
             $message = "<p>Merci pour votre inscription à Smart_menu.<p>
-            Veuillez suivre <a href='http://localhost:8080/smart_menu/login/confirmation</a> pour confirmer votre inscription.";
+            Veuillez suivre <a href='".base_url()."front/confirmation/".$user->id."'> ce lien</a> pour confirmer votre inscription.";
             $this->email->message($message);
             $this->email->send();
 
             $user = $this->User_model->selectuserbyemail($email);
-            $params = ['user_id' => $user->id];
-            $this->Establishment_model->insert($params);
+            $userid = ['user_id' => $user->id];
+            $this->Establishment_model->insert($userid);
 
             $this->template->load('front/template', 'front/formsuccess');
         } else {
             $this->signin();
         }
     }
+
+    public function confirmation($id)
+    {
+        $this->User_model->changeactif($id);
+        $this->template->load('front/template', 'front/login');
+    }
+
 
     public function login()
     {
@@ -92,7 +99,7 @@ class Front extends CI_Controller
             $pseudo = $user->pseudo;
 
 // TODO -------------FAIRE L'ENVOI DE MAIL AVEC ACTIF 1 ET LE MODIFIER ICI !!!
-            if (password_verify($password, $user->password) && $user->actif == 0) {
+            if (password_verify($password, $user->password) && $user->actif == 1) {
                 $session_data = array(
                     'user_id' => $user->id,
                     'email' => $email,

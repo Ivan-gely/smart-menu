@@ -8,13 +8,21 @@
                 <input type="text" name="name" class="form-control" id="name" value=<?=$this->input->post('name')?>>
                 <?php echo form_error('name'); ?>
             </div>
+
+            
             <div class="form-group col-md-6">
                 <label for="addressweb">Adresse web d'accès à votre carte</label>
-                <input type="text" name="addressweb" class="form-control" id="addressweb" value="<?=$this->input->post('addressweb')?>">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class=" input-group-text" id="addressweb"><?= base_url()?></span>
+                    </div>
+                    <input type="text" name="addressweb" class="form-control" id="addressweb" aria-describedby="addressweb"
+                        value="<?=$this->input->post('addressweb')?>">
+                </div>
                 <?php echo form_error('addressweb'); ?>
-            </div>
+            </div>  
         </div>
-
+        
 
         <div class="form-row">
 

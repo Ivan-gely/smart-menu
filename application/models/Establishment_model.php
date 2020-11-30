@@ -12,4 +12,8 @@ class Establishment_model extends CI_Model
         $this->db->where('user_id', $params2);
         $this->db->update('establishment', $params);
     }
+
+    public function insert($params){
+        $this->db->insert('establishment', $params);
+    }
 }
