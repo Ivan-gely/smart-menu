@@ -100,17 +100,17 @@ class Manager extends CI_Controller
     {
         if ($this->controle() == true) {
             $user_id = $_SESSION["user_id"];
-            $image = $this->Image_model->selectbyuserid($user_id);
-            if ($image == '') {
-                $data['image'] = array(
-                    'id' => 1,
-                    'user_id' => 1,
-                    'name' => 'exemple',
-                    'type' => '.jpg',
-                );
+            $imageexist = $this->Image_model->selectbyuserid($user_id);
+
+            if ($imageexist == '') {
+                $image = $this->Image_model->selectimagepardefaut();
+                $data['image'] = $image;
             } else {
+                $image = $this->Image_model->selectbyuserid($user_id);
                 $data['image'] = $image;
             }
+            
+
             $this->load->library('upload');
             $data = array(
                 'user_id' => $_SESSION["user_id"],
@@ -161,7 +161,8 @@ class Manager extends CI_Controller
             $config['quality'] = 50;
             $config['width'] = 200;
             $config['height'] = 150;
-
+            
+            
             $this->load->library('image_lib', $config);
             $this->image_lib->resize();
 
@@ -172,7 +173,11 @@ class Manager extends CI_Controller
                 'type' => $data['upload_data']['file_ext'],
             );
 
-            $this->Image_model->update($params, $_SESSION['user_id']);
+            
+            
+
+            $this->Image_model->update($params, $_SESSION["user_id"]);
+            
             $this->template->load('back/template', 'back/customization', $data);
             redirect(base_url() . 'manager/customization', $data);
         } else {
@@ -207,17 +212,43 @@ class Manager extends CI_Controller
     public function category()
     {
         if ($this->controle() == true) {
-            $cat = $this->Category_model->selectestbyid($_SESSION['establishment_id']);
+            $catexist = $this->Category_model->selectestbyid($_SESSION['establishment_id']);
 
-            if ($cat != '') {
+            if ($catexist == '') {
                 redirect(base_url() . 'manager/add_category');
             } else {
                 $esta_id = $_SESSION['establishment_id'];
                 $cat = $this->Category_model->selectestbyid($esta_id);
                 $data["cat"] = $cat;
-                $this->template->load('back/template', 'back/category', $data);}
+                $this->template->load('back/template', 'back/category', $data);
+            }
         } else {
             redirect(base_url() . 'manager/create_establishment');
+        }
+    }
+
+    public function add_category()
+    {
+        if ($this->controle() == true) {
+            $this->template->load('back/template', 'back/add_category');
+        } else {
+            redirect(base_url() . 'manager/create_establishment');
+        }
+    }
+
+    public function add_category_validation()
+    {
+        if ($this->form_validation->run('category')) {
+            $data = [
+                'establishment_id' => $_SESSION['establishment_id'],
+                'name_cat' => $this->input->post('name'),
+                'description_cat' => $this->input->post('description'),
+            ];
+            $this->Category_model->insert($data);
+
+            redirect(base_url() . 'manager/category');
+        } else {
+            $this->add_category();
         }
     }
 
@@ -251,47 +282,25 @@ class Manager extends CI_Controller
         redirect(base_url() . 'manager/category');
     }
 
-    public function add_category()
-    {
-        if ($this->controle() == true) {
-            $this->template->load('back/template', 'back/add_category');
-        } else {
-            redirect(base_url() . 'manager/create_establishment');
-        }
-    }
-
-    public function add_category_validation()
-    {
-        if ($this->form_validation->run('category')) {
-            $data = [
-                'establishment_id' => $_SESSION['establishment_id'],
-                'name_cat' => $this->input->post('name'),
-                'description_cat' => $this->input->post('description'),
-            ];
-            $this->Category_model->insert($data);
-
-            redirect(base_url() . 'manager/category');
-        } else {
-            $this->add_category();
-        }
-    }
-
 //=====================================================
 
     public function product()
     {
         if ($this->controle() == true) {
-            $cat = $this->Category_model->selectestbyid($_SESSION['establishment_id']);
+            $catexist = $this->Category_model->selectestbyid($_SESSION['establishment_id']);
 
-            if ($cat != '') {
-                redirect(base_url() . 'manager/add_category');
+            $cat = $this->Product_model->selectcatbyestid($_SESSION['establishment_id']);
+            foreach ($cat as $v) {
+                $cat_ids[] = $v->id;
+            }
+            $products = $this->Product_model->selectproductbycatid($cat_ids);
+            print_r($catexist);
+            print_r($products);
+
+
+            if ($catexist != '' and $products != '') {
+                redirect(base_url() . 'manager/add_product');
             } else {
-                $cat = $this->Product_model->selectcatbyestid($_SESSION['establishment_id']);
-                foreach ($cat as $v) {
-                    $cat_ids[] = $v->id;
-                }
-                $products = $this->Product_model->selectproductbycatid($cat_ids);
-
                 $prod_cat = [];
                 foreach ($products as $product) {
                     if (!isset($prod_cat[$product->name_cat])) {
@@ -312,11 +321,9 @@ class Manager extends CI_Controller
     {
         if ($this->controle() == true) {
             $cat = $this->Category_model->selectestbyid($_SESSION['establishment_id']);
-
-            if ($cat != '') {
+            if ($cat == '') {
                 redirect(base_url() . 'manager/add_category');
             } else {
-
                 $estid = $_SESSION['establishment_id'];
                 $cat = $this->Category_model->selectestbyid($estid);
                 $data["cat"] = $cat;
@@ -332,6 +339,8 @@ class Manager extends CI_Controller
         $cat_name = $this->input->post('cat');
         $cat = $this->Product_model->selectbycatname($cat_name);
         $cat_id = $cat->id;
+        exit('okaddproductvalidation');
+
         if ($this->form_validation->run('product')) {
             $data = [
                 'category_id' => $cat_id,

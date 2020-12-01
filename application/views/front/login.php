@@ -1,6 +1,8 @@
 <form method="POST" action="<? echo base_url();?>front/login_validation">
     <h3 class="text-success">Connectez vous maintenant !</h3>
     <hr><br>
+
+    <h4><?= $success = '' ?></h4>
     <div class="form-group">
         <label for="email">Email</label>
         <input type="email" name="email" class="form-control" value="<?=set_value('email');?>" id="email" size="50">
@@ -8,7 +10,6 @@
     </div>
 
     <div class="form-group">
-
         <label for="password">Mot de passe</label>
         <input type="password" name="password" class="form-control" value="<?=set_value('password');?>" id="password"
             size="50">

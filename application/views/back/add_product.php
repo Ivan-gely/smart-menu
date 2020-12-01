@@ -1,6 +1,5 @@
 <div class="container">
-    <form method="POST" action="<?= base_url()?>manager/add_product_validation">
-
+    <?php echo form_open_multipart('manager/add_product_validation'); ?>
         <br>
         <h3 class="text-success text-center">Ajouter un produit</h3><br>
         <div class="form-row">
@@ -35,16 +34,6 @@
                     value="<?=$this->input->post('price')?>">
                 <?php echo form_error('price'); ?>
             </div>
-
-            <!-- <div class="form-group"><img
-                    src="<?=base_url() . 'uploads/product/' . $image->image_product?>?t=<?=time()?>"
-                    alt="product">
-
-                <?php echo form_open_multipart('manager/upload_img_product'); ?>
-                <input type="file" for="img_product" name="img_product">
-                <input type="submit" id="img_product" class="btn btn-success" name="valider" value="Télécharger"><br>
-                <?php echo $error; ?>
-            </div> -->
     </form>
 
 </div>

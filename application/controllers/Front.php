@@ -49,7 +49,7 @@ class Front extends CI_Controller
             $email = $this->input->post('email');
             $password = $this->input->post('password');
             $password = password_hash($password, PASSWORD_DEFAULT);
-            
+
             $data['pseudo'] = $pseudo;
             $data['email'] = $email;
             $data['password'] = $password;
@@ -61,9 +61,15 @@ class Front extends CI_Controller
             $this->email->to($email);
             $this->email->subject('Inscription pour Smart_menu');
             $message = "<p>Merci pour votre inscription à Smart_menu.<p>
-            Veuillez suivre <a href='".base_url()."front/confirmation/".$user->id."'> ce lien</a> pour confirmer votre inscription.";
+            Veuillez suivre <a href='" . base_url() . "front/confirmation/" . $user->id . "'> ce lien</a> pour confirmer votre inscription.";
             $this->email->message($message);
-            $this->email->send();
+            
+
+            if ($this->email->send() == true) {
+                $this->email->send();
+            } else {
+                print_r($this->email->print_debugger());
+            }
 
             $user = $this->User_model->selectuserbyemail($email);
             $userid = ['user_id' => $user->id];
@@ -78,9 +84,11 @@ class Front extends CI_Controller
     public function confirmation($id)
     {
         $this->User_model->changeactif($id);
-        $this->template->load('front/template', 'front/login');
+        $data = array (
+            'success' => 'Votre compte est désormais actif, vous pouvez vous connecter !'
+        );
+        $this->template->load('front/template', 'front/login', $data);
     }
-
 
     public function login()
     {

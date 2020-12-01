@@ -8,6 +8,11 @@ class Image_model extends CI_Model
         return $query->row();
     }
 
+    public function selectimagepardefaut(){
+        $query = $this->db->get('imagepardefaut');
+        return $query->row();
+    }
+
     public function update($params, $params2){
         $this->db->where('user_id', $params2);
         $this->db->update('image', $params);
